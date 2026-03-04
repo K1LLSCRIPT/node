@@ -5,6 +5,7 @@ import express, { json } from 'express';
 import { createLogger } from 'winston';
 import compression from 'compression';
 import * as winston from 'winston';
+import * as fs from 'node:fs';
 import helmet from 'helmet';
 import morgan from 'morgan';
 
@@ -139,6 +140,12 @@ const logger = createLogger({
 });
 
 async function bootstrap(): Promise<void> {
+    const internalSocketPath = process.env.INTERNAL_SOCKET_PATH!;
+
+    if (fs.existsSync(internalSocketPath)) {
+        fs.unlinkSync(internalSocketPath);
+    }
+
     await initializeMTLSCerts();
     
     const nodePayload = parseNodePayload();
@@ -202,7 +209,7 @@ async function bootstrap(): Promise<void> {
         },
     );
 
-    const internalServer = internalApp.listen(XRAY_INTERNAL_API_PORT, '127.0.0.1');
+    const internalServer = internalApp.listen(internalSocketPath);
 
     let internalServerClosed = false;
 
@@ -211,6 +218,10 @@ async function bootstrap(): Promise<void> {
         internalServerClosed = true;
 
         internalServer.close(() => {
+            if (fs.existsSync(internalSocketPath)) {
+                fs.unlinkSync(internalSocketPath);
+            }
+
             logger.info('Shutting down...');
         });
     };
