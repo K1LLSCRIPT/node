@@ -1,4 +1,5 @@
 import { utilities as nestWinstonModuleUtilities, WinstonModule } from 'nest-winston';
+import * as bodyParser from '@kastov/body-parser-with-zstd';
 import { ZodValidationPipe } from 'nestjs-zod';
 import express, { json } from 'express';
 import { createLogger } from 'winston';
@@ -150,12 +151,17 @@ async function bootstrap(): Promise<void> {
             requestCert: true,
             rejectUnauthorized: true,
         },
+        bodyParser: false,
         logger: WinstonModule.createLogger({
             instance: logger,
         }),
     });
 
-    app.use(json({ limit: '1000mb' }));
+    app.use(
+        bodyParser.json({
+            limit: '1000mb',
+        }),
+    );
 
     app.use(compression());
 
