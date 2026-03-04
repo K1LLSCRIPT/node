@@ -210,13 +210,12 @@ async function bootstrap(): Promise<void> {
     };
 
     app.enableShutdownHooks();
-
     process.on('SIGINT', closeInternalServer);
     process.on('SIGTERM', closeInternalServer);
 
     logger.info(
         '\n' +
-            (await getStartMessage(Number(config.getOrThrow<string>('APP_PORT')), app)) +
+            (await getStartMessage(Number(process.env.APP_PORT || 2222), app)) +
             '\n',
     );
 }
