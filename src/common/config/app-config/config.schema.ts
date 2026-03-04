@@ -5,28 +5,34 @@ import { parseNodePayloadFromConfigService } from '@common/utils/decode-node-pay
 
 export const configSchema = z
     .object({
-        APP_PORT: z
-            .string()
-            .default('3000')
-            .transform((port) => parseInt(port, 10)),
-        SSL_CERT: z.string(),
+        NODE_PORT: z.string().transform((port) => {
+            return parseInt(port, 10);
+        }),
+        SECRET_KEY: z.string(),
         JWT_PUBLIC_KEY: z.string().optional(),
-        XTLS_IP: z.string().default('127.0.0.1'),
-        XTLS_PORT: z.string().default('61000'),
         DISABLE_HASHED_SET_CHECK: z
             .string()
             .default('false')
             .transform((val) => val === 'true'),
+        XTLS_API_PORT: z.string().transform((port) => {
+            return parseInt(port, 10);
+        }),
+        INTERNAL_REST_TOKEN: z.string(),
+        SUPERVISORD_USER: z.string(),
+        SUPERVISORD_PASSWORD: z.string(),
+        INTERNAL_SOCKET_PATH: z.string(),
+        SUPERVISORD_SOCKET_PATH: z.string(),
+        SUPERVISORD_PID_PATH: z.string(),
     })
     .superRefine((data, ctx) => {
-        if (data.SSL_CERT) {
+        if (data.SECRET_KEY) {
             try {
-                const parsed = parseNodePayloadFromConfigService(data.SSL_CERT);
+                const parsed = parseNodePayloadFromConfigService(data.SECRET_KEY);
                 data.JWT_PUBLIC_KEY = parsed.jwtPublicKey;
             } catch {
                 ctx.addIssue({
                     code: z.ZodIssueCode.custom,
-                    message: 'Invalid SSL certificate payload',
+                    message: 'Invalid SECRET_KEY payload',
                 });
             }
         }

@@ -5,10 +5,12 @@ services:
       dockerfile: dev.Dockerfile
     container_name: remnawave-node-dev
     hostname: remnawave-node-dev
+    env_file:
+      - .env
     networks:
       - remnawave-node-dev
     ports:
-      - 24000:24000
+      - 11000:11000
     restart: no
     labels:
       dev.containers.features: 'common'

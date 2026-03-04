@@ -9,9 +9,11 @@ import { ERRORS } from '@libs/contracts/constants';
 import {
     GetAllInboundsStatsResponseModel,
     GetAllOutboundsStatsResponseModel,
+    GetCombinedStatsResponseModel,
     GetInboundStatsResponseModel,
     GetOutboundStatsResponseModel,
     GetSystemStatsResponseModel,
+    GetUserIpListResponseModel,
     GetUserOnlineStatusResponseModel,
     GetUsersStatsResponseModel,
 } from './models';
@@ -53,7 +55,7 @@ export class StatsService {
             const response = await this.xtlsSdk.stats.getSysStats();
 
             if (!response.isOk || !response.data) {
-                this.logger.error(response);
+                this.logger.warn(response);
                 return {
                     isOk: false,
                     ...ERRORS.FAILED_TO_GET_SYSTEM_STATS,
@@ -225,6 +227,76 @@ export class StatsService {
             return {
                 isOk: false,
                 ...ERRORS.FAILED_TO_GET_INBOUNDS_STATS,
+            };
+        }
+    }
+
+    public async getCombinedStats(
+        reset: boolean,
+    ): Promise<ICommandResponse<GetCombinedStatsResponseModel>> {
+        try {
+            const { isOk: isOkInbounds, data: inboundsData } =
+                await this.xtlsSdk.stats.getAllInboundsStats(reset);
+            const { isOk: isOkOutbounds, data: outboundsData } =
+                await this.xtlsSdk.stats.getAllOutboundsStats(reset);
+
+            if (!isOkInbounds || !inboundsData || !isOkOutbounds || !outboundsData) {
+                return {
+                    isOk: false,
+                    ...ERRORS.FAILED_TO_GET_COMBINED_STATS,
+                };
+            }
+
+            return {
+                isOk: true,
+                response: new GetCombinedStatsResponseModel(
+                    inboundsData.inbounds,
+                    outboundsData.outbounds,
+                ),
+            };
+        } catch (error) {
+            this.logger.error(error);
+            return {
+                isOk: false,
+                ...ERRORS.FAILED_TO_GET_COMBINED_STATS,
+            };
+        }
+    }
+
+    public async getUserIpList(
+        userId: string,
+    ): Promise<ICommandResponse<GetUserIpListResponseModel>> {
+        try {
+            const userIps = await this.xtlsSdk.stats.rawClient.getStatsOnlineIpList({
+                name: `user>>>${userId}>>>online`,
+                reset: true,
+            });
+
+            const ips = Object.keys(userIps.ips);
+
+            if (ips.length === 0) {
+                return {
+                    isOk: true,
+                    response: new GetUserIpListResponseModel([]),
+                };
+            }
+
+            return {
+                isOk: true,
+                response: new GetUserIpListResponseModel(ips),
+            };
+        } catch (error) {
+            if (error && typeof error === 'object' && 'code' in error && error.code === 5) {
+                return {
+                    isOk: true,
+                    response: new GetUserIpListResponseModel([]),
+                };
+            }
+
+            this.logger.error(error);
+            return {
+                isOk: true,
+                response: new GetUserIpListResponseModel([]),
             };
         }
     }

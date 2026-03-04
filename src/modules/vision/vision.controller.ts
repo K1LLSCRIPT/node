@@ -1,19 +1,14 @@
-import { Body, Controller, Post, UseFilters, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseFilters } from '@nestjs/common';
 
-import { OnPort } from '@common/decorators/port/port.decorator';
-import { PortGuard } from '@common/guards/request-port-guard';
 import { HttpExceptionFilter } from '@common/exception';
 import { errorHandler } from '@common/helpers';
 import { VISION_CONTROLLER, VISION_ROUTES } from '@libs/contracts/api/controllers/vision';
-import { XRAY_INTERNAL_API_PORT } from '@libs/contracts/constants';
 
 import { UnblockIpRequestDto, UnblockIpResponseDto } from './dtos/unblock-ip.dto';
 import { BlockIpRequestDto, BlockIpResponseDto } from './dtos/block-ip.dto';
 import { VisionService } from './vision.service';
 
-@OnPort(XRAY_INTERNAL_API_PORT)
 @UseFilters(HttpExceptionFilter)
-@UseGuards(PortGuard)
 @Controller(VISION_CONTROLLER)
 export class VisionController {
     constructor(private readonly visionService: VisionService) {}

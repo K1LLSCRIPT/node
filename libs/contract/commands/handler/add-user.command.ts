@@ -20,7 +20,6 @@ export namespace AddUserCommand {
         tag: z.string(),
         username: z.string(),
         password: z.string(),
-        level: z.number().default(0),
     });
 
     const BaseVlessUser = z.object({
@@ -29,7 +28,6 @@ export namespace AddUserCommand {
         username: z.string(),
         uuid: z.string(),
         flow: z.enum(['xtls-rprx-vision', '']),
-        level: z.number().default(0),
     });
 
     const BaseShadowsocksUser = z.object({
@@ -39,45 +37,11 @@ export namespace AddUserCommand {
         password: z.string(),
         cipherType: z.nativeEnum(CipherType),
         ivCheck: z.boolean(),
-        level: z.number().default(0),
-    });
-
-    const BaseShadowsocks2022User = z.object({
-        type: z.literal('shadowsocks2022'),
-        tag: z.string(),
-        username: z.string(),
-        key: z.string(),
-        level: z.number().default(0),
-    });
-
-    const BaseSocksUser = z.object({
-        type: z.literal('socks'),
-        tag: z.string(),
-        username: z.string(),
-        socks_username: z.string(),
-        socks_password: z.string(),
-        level: z.number().default(0),
-    });
-
-    const BaseHttpUser = z.object({
-        type: z.literal('http'),
-        tag: z.string(),
-        username: z.string(),
-        http_username: z.string(),
-        http_password: z.string(),
-        level: z.number().default(0),
     });
 
     export const RequestSchema = z.object({
         data: z.array(
-            z.discriminatedUnion('type', [
-                BaseTrojanUser,
-                BaseVlessUser,
-                BaseShadowsocksUser,
-                BaseShadowsocks2022User,
-                BaseSocksUser,
-                BaseHttpUser,
-            ]),
+            z.discriminatedUnion('type', [BaseTrojanUser, BaseVlessUser, BaseShadowsocksUser]),
         ),
         hashData: z.object({
             vlessUuid: z.string().uuid(),

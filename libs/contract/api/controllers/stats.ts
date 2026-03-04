@@ -10,4 +10,8 @@ export const STATS_ROUTES = {
 
     GET_ALL_OUTBOUNDS_STATS: 'get-all-outbounds-stats',
     GET_ALL_INBOUNDS_STATS: 'get-all-inbounds-stats',
+
+    GET_COMBINED_STATS: 'get-combined-stats',
+
+    GET_USER_IP_LIST: 'get-user-ip-list',
 } as const;
