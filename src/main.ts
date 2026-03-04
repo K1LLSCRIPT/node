@@ -10,6 +10,7 @@ import morgan from 'morgan';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 
+import { initializeMTLSCerts } from '@common/utils/generate-mtls-certs';
 import { parseNodePayload } from '@common/utils/decode-node-payload';
 import { getStartMessage } from '@common/utils/get-start-message';
 import { isDevelopment } from '@common/utils/is-development';
@@ -137,6 +138,8 @@ const logger = createLogger({
 });
 
 async function bootstrap(): Promise<void> {
+    await initializeMTLSCerts();
+    
     const nodePayload = parseNodePayload();
 
     const app = await NestFactory.create(AppModule, {
